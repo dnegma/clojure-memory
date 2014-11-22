@@ -23,6 +23,12 @@
                (assoc board one val two val)))))
   )
 
+(defn print-board [board dim-x]
+  (println (clojure.string/join \newline (map #(clojure.string/join \space %) (partition dim-x (vals (into (sorted-map) board)))))))
+
+(defn hidden-board [board]
+  (zipmap (keys board) (repeat (count board) "*")))
+
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
@@ -30,7 +36,16 @@
 
   (let [dim-x 4
         dim-y 4
-        board (generate-board dim-x dim-y)]
-
-    (println (clojure.string/join \newline (map #(clojure.string/join \space %) (partition dim-x (vals (into (sorted-map) board)))))))
-)
+        real-board (generate-board dim-x dim-y)
+        hidden-board (hidden-board real-board)]
+    (print-board hidden-board dim-x)
+    (loop [total 0
+           card (Integer/parseInt (read-line))
+           board hidden-board]
+      (when-not (>= total (* dim-x dim-y))
+        (print-board (assoc board card (real-board card)) dim-x)
+        (recur (inc total) (Integer/parseInt (read-line)) (assoc board card (real-board card)))
+        )
+      )
+   )
+ )
