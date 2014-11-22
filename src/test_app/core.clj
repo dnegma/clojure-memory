@@ -34,17 +34,24 @@
   [& args]
   (println (str "Hello, "))
 
-  (let [dim-x 4
-        dim-y 4
+  (let [dim-x 2
+        dim-y 2
         real-board (generate-board dim-x dim-y)
         hidden-board (hidden-board real-board)]
     (print-board hidden-board dim-x)
-    (loop [total 0
+    (loop [total 1
+           old-card -1
            card (Integer/parseInt (read-line))
            board hidden-board]
       (when-not (>= total (* dim-x dim-y))
         (print-board (assoc board card (real-board card)) dim-x)
-        (recur (inc total) (Integer/parseInt (read-line)) (assoc board card (real-board card)))
+        (if (>= old-card 0)
+          (if (not (= (real-board old-card) (real-board card)))
+            (do
+              (recur (- total 1) -1 (Integer/parseInt (read-line)) (assoc board old-card "*" card "*")))
+            (do
+              (recur (inc total) -1 (Integer/parseInt (read-line)) (assoc board card (real-board card)))))
+          (recur (inc total) card (Integer/parseInt (read-line)) (assoc board card (real-board card))))
         )
       )
    )
