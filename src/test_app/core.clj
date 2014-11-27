@@ -32,8 +32,12 @@
 (defn reveal-card [board card real-board]
   (assoc board card (real-board card)))
 
-(defn hide-cards [board old-card card]
-  (assoc board old-card "*" card "*"))
+(defn hide-cards [board keys]
+  (println keys)
+  (apply assoc board (interleave keys (repeat "*"))))
+
+(defn revealed? [board card]
+  (not (= (board card) "*")))
 
 (defn -main
   [& args]
@@ -42,20 +46,24 @@
         dim-y 2
         real-board (generate-board random-value dim-x dim-y)
         hidden-board (hidden-board real-board)]
-    (loop [old-card -1
+    (loop [pair #{}
            board hidden-board]
       (print-board board dim-x)
 
+      (println (str "Pair: " pair))
       (if-not (= board real-board)
-        (let [card (Integer/parseInt (read-line))]
-          (if (>= old-card 0)
-            (if (not (= (real-board old-card) (real-board card)))
-              (do
-                (print-board (reveal-card board card real-board) dim-x)
-                (recur -1 (hide-cards board old-card card)))
-              (do
-                (recur -1 (reveal-card board card real-board))))
-            (recur card (reveal-card board card real-board))))
+        (let [card (Integer/parseInt (read-line))
+              opened-card-board (reveal-card board card real-board)]
+
+          (if-not (revealed? board card)
+            (if (second pair)
+              (if (not (apply = (map real-board pair)))
+                (do
+                  (recur #{card} (hide-cards opened-card-board pair)))
+                (do
+                  (recur #{card} opened-card-board)))
+              (recur (conj pair card) opened-card-board))
+            (recur pair board)))
         )
       )
    )
