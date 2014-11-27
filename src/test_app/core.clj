@@ -24,10 +24,16 @@
                (assoc board one val two val))))))
 
 (defn print-board [board dim-x]
-  (println (clojure.string/join \newline (map #(clojure.string/join \space %) (partition dim-x (vals (into (sorted-map) board)))))))
+  (println (str \newline (clojure.string/join \newline (map #(clojure.string/join \space %) (partition dim-x (vals (into (sorted-map) board))))))))
 
 (defn hidden-board [board]
   (zipmap (keys board) (repeat (count board) "*")))
+
+(defn reveal-card [board card real-board]
+  (assoc board card (real-board card)))
+
+(defn hide-cards [board old-card card]
+  (assoc board old-card "*" card "*"))
 
 (defn -main
   [& args]
@@ -36,22 +42,20 @@
         dim-y 2
         real-board (generate-board random-value dim-x dim-y)
         hidden-board (hidden-board real-board)]
-    (print-board hidden-board dim-x)
-    (loop [total 1
-           old-card -1
-           card (Integer/parseInt (read-line))
+    (loop [old-card -1
            board hidden-board]
-      (if-not (>= total (* dim-x dim-y))
-        (do
-          (print-board (assoc board card (real-board card)) dim-x)
+      (print-board board dim-x)
+
+      (if-not (= board real-board)
+        (let [card (Integer/parseInt (read-line))]
           (if (>= old-card 0)
             (if (not (= (real-board old-card) (real-board card)))
               (do
-                (recur (- total 1) -1 (Integer/parseInt (read-line)) (assoc board old-card "*" card "*")))
+                (print-board (reveal-card board card real-board) dim-x)
+                (recur -1 (hide-cards board old-card card)))
               (do
-                (recur (inc total) -1 (Integer/parseInt (read-line)) (assoc board card (real-board card)))))
-            (recur (inc total) card (Integer/parseInt (read-line)) (assoc board card (real-board card)))))
-        (print-board (assoc board card (real-board card)) dim-x)
+                (recur -1 (reveal-card board card real-board))))
+            (recur card (reveal-card board card real-board))))
         )
       )
    )
