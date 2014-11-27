@@ -39,6 +39,12 @@
 (defn revealed? [board card]
   (not (= (board card) "*")))
 
+(defn read-int []
+  (try
+    (Integer/parseInt (read-line))
+    (catch Exception e
+      -1)))
+
 (defn -main
   [& args]
 
@@ -52,7 +58,7 @@
 
       (println (str "Pair: " pair))
       (if-not (= board real-board)
-        (let [card (Integer/parseInt (read-line))
+        (let [card (read-int)
               opened-card-board (reveal-card board card real-board)]
 
           (if-not (revealed? board card)
